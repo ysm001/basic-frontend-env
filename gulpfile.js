@@ -5,6 +5,7 @@ var uglify = require("gulp-uglify");
 var browser = require("browser-sync");
 var plumber = require("gulp-plumber");
 var coffee = require("gulp-coffee");
+var watch = require("gulp-watch");
 
 gulp.task("server", function() {
   browser({
@@ -43,8 +44,8 @@ gulp.task("html",function(){
 });
 
 gulp.task("default", ["server"], function() {
-  gulp.watch("src/coffee/**/*.coffee",["coffee"]);
-  gulp.watch(["src/js/**/*.js","!src/js/min/**/*.js"],["js"]);
-  gulp.watch("src/sass/**/*.scss",["sass"]);
-  gulp.watch(["src/**/*.html"],["html"]);
+  watch("src/coffee/**/*.coffee",function() {gulp.start(["coffee"])});
+  watch(["src/js/**/*.js","!src/js/min/**/*.js"],function() {gulp.start(["js"])});
+  watch("src/sass/**/*.scss",function() {gulp.start(["sass"])});
+  watch(["src/**/*.html"],function() {gulp.start(["html"])});
 });
