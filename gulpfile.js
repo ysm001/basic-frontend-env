@@ -6,6 +6,7 @@ var browser = require("browser-sync");
 var plumber = require("gulp-plumber");
 var coffee = require("gulp-coffee");
 var watch = require("gulp-watch");
+var coffeeSourcemaps = require('gulp-sourcemaps');
 
 gulp.task("server", function() {
   browser({
@@ -15,7 +16,7 @@ gulp.task("server", function() {
   });
 });
 
-gulp.task("sass", function() {
+gulp.task("compile-sass", function() {
   gulp.src("src/sass/**/*.scss")
   .pipe(plumber())
   .pipe(sass())
@@ -24,13 +25,16 @@ gulp.task("sass", function() {
   .pipe(browser.reload({stream:true}));
 });
 
-gulp.task("coffee", function() {
-  gulp.src('src/coffee/**/*.coffee')
-  .pipe(coffee())
-  .pipe(gulp.dest('./src/js'));
+gulp.task("compile-coffee", function() {
+  gulp.src("src/coffee/**/*.coffee")
+  .pipe(plumber())
+  .pipe(coffeeSourcemaps.init())
+  .pipe(coffee({bare: true}))
+  .pipe(coffeeSourcemaps.write())
+  .pipe(gulp.dest("./src/js"));
 });
 
-gulp.task("js", function() {
+gulp.task("minify-js", function() {
     gulp.src(["src/js/**/*.js","!src/js/min/**/*.js"])
     .pipe(plumber())
     .pipe(uglify())
@@ -44,8 +48,8 @@ gulp.task("html",function(){
 });
 
 gulp.task("default", ["server"], function() {
-  watch("src/coffee/**/*.coffee",function() {gulp.start(["coffee"])});
-  watch(["src/js/**/*.js","!src/js/min/**/*.js"],function() {gulp.start(["js"])});
-  watch("src/sass/**/*.scss",function() {gulp.start(["sass"])});
+  watch("src/coffee/**/*.coffee",function() {gulp.start(["compile-coffee"])});
+  watch(["src/js/**/*.js","!src/js/min/**/*.js"],function() {gulp.start(["minify-js"])});
+  watch("src/sass/**/*.scss",function() {gulp.start(["compile-sass"])});
   watch(["src/**/*.html"],function() {gulp.start(["html"])});
 });
